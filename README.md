@@ -4,7 +4,7 @@ Script converts multiple .dbf files into a single sqlite table for querying and 
 
 
 
-**Intended Purpose:** I wrote this script primarily for migrating legacy FoxPro database based apps. These apps normally have mass amounts of .dbf files scatter over multitple directories. I use MacOS's search function to find all .dbf inside of the root directory and then just copy and paste into the data folder.
+**Intended Purpose:** I wrote this script primarily for migrating legacy FoxPro database based apps. These apps normally have mass amounts of .dbf files scattered over multitple directories. I use MacOS's search function to find all .dbf inside of the root directory and then just copy and paste into the data folder.
 
 
 
