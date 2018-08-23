@@ -55,7 +55,9 @@ def writeCsv(sql_file,file_name='temp',split_count=0):
 					l_zero='0'
 				else:
 					l_zero=''
-				with open('export/'+name+'_'+l_zero+str(file)+'.csv', 'w') as f:
+				split_filename = name+'_'+l_zero+str(file)
+				print(f"{split_filename} created with {count} rows...\n")
+				with open('export/'+split_filename+'.csv', 'w') as f:
 					writer = csv.writer(f)
 					writer.writerow(names)
 					writer.writerows(ret)
@@ -64,6 +66,7 @@ def writeCsv(sql_file,file_name='temp',split_count=0):
 				ret=[]
 
 	if split_count==0 or split_count>=ret_count:
+		print(f"{file_name} created with {ret_count} rows...\n")
 		with open('export/'+name+'.csv', 'w') as f:
 			writer = csv.writer(f)
 			writer.writerow(names)
