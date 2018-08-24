@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import sqlite3
 import csv
+import time
 
 
 load_text="""
@@ -20,6 +21,8 @@ print('Selecting y will rebuild the database from dbf files.\n')
 
 print('Load Database?')
 load = input('-->')
+
+start_time = time.clock()
 
 db_filename = 'new_database.db'
 fileCheck = os.path.isfile(db_filename)
@@ -56,8 +59,8 @@ def writeCsv(sql_file,file_name='temp',split_count=0):
 				else:
 					l_zero=''
 				split_filename = name+'_'+l_zero+str(file)
-				print(f"{split_filename} created with {count} rows...\n")
-				with open('export/'+split_filename+'.csv', 'w') as f:
+				print(f"{split_filename.capitalize()} created with {count} rows...\n")
+				with open('\nexport/'+split_filename+'.csv', 'w') as f:
 					writer = csv.writer(f)
 					writer.writerow(names)
 					writer.writerows(ret)
@@ -66,7 +69,7 @@ def writeCsv(sql_file,file_name='temp',split_count=0):
 				ret=[]
 
 	if split_count==0 or split_count>=ret_count:
-		print(f"{file_name} created with {ret_count} rows...\n")
+		print(f"\n{file_name.capitalize()} created with {ret_count} rows...\n")
 		with open('export/'+name+'.csv', 'w') as f:
 			writer = csv.writer(f)
 			writer.writerow(names)
@@ -74,6 +77,8 @@ def writeCsv(sql_file,file_name='temp',split_count=0):
 
 
 def dbIndex(table_name,field):
+	#creates indexes on single table for 1 or more column
+	#table must be a string, field can be string or list
 	if type(field) is not list: field = [field]
 	i_query = ""
 	for i in field:
@@ -89,7 +94,11 @@ if load.lower()=='y':
 	files = [x for x in files if not x.startswith('.')]
 	files = [x for x in files if x.lower().endswith('.dbf')]
 	files.sort()
+
+	print(f"\nA total of {len(files)} will be loaded...\n")
+	time.sleep(2)
 	
+	#loading tables into database
 	for table in files:
 		print(f'Loading {table}...')
 		dbf = DBF(f'data/{table}')
@@ -97,6 +106,7 @@ if load.lower()=='y':
 		if not df.empty:
 			df.to_sql(name=table[:-4], con=conn, if_exists = 'replace', index=False)
 	
+	#creating table that gives you an over view of the database
 	table_overview_ct="""
 	CREATE TABLE IF NOT EXISTS TABLE_OVERVIEW (
 		TABLE_NAME	TEXT,
@@ -127,9 +137,18 @@ if load.lower()=='y':
 	#or multiple columns in a list can be passed 		
 	dbIndex('TABLE_OVERVIEW','TABLE_NAME')
 
+#clear out previous export files
+contents =  os.listdir('./export')
+contents = [x for x in contents if not x.startswith('.')]
+for file in contents:
+	os.remove('export/'+file)
+
 #example csv export
 #Add ,split_count=50 to create multiple files at 50 lines per file,
 #or what ever number you like
 writeCsv("SELECT * FROM TABLE_OVERVIEW ORDER BY ROW_COUNT DESC",'TABLE_OVERVIEW')
+
+time_took= str(round(time.clock() - start_time,3))
+print(f"Seconds taken... {time_took}\n")
 
 conn.commit()
