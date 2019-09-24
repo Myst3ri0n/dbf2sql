@@ -1,9 +1,11 @@
 from dbfread import DBF
+from tqdm import tqdm
 import pandas as pd
-import os
 import sqlite3
-import csv
 import time
+import csv
+import os
+
 
 
 load_text="""
@@ -22,7 +24,7 @@ print('Selecting y will rebuild the database from dbf files.\n')
 print('Load Database?')
 load = input('-->')
 
-start_time = time.clock()
+start_time = time.process_time()
 
 db_filename = 'new_database.db'
 fileCheck = os.path.isfile(db_filename)
@@ -95,12 +97,12 @@ if load.lower()=='y':
 	files = [x for x in files if x.lower().endswith('.dbf')]
 	files.sort()
 
-	print(f"\nA total of {len(files)} will be loaded...\n")
+	print(f"\nA total of {len(files)} tables will be loaded...\n")
 	time.sleep(2)
 	
 	#loading tables into database
-	for table in files:
-		print(f'Loading {table}...')
+	for table in tqdm(files):
+		#print(f'Loading {table}...')
 		dbf = DBF(f'data/{table}')
 		df = pd.DataFrame(iter(dbf))
 		if not df.empty:
@@ -117,9 +119,11 @@ if load.lower()=='y':
 	"""
 	conn.execute(table_overview_ct)
 	
-	for file in files:
+	print('\nCreating Stats...')
+
+	for file in tqdm(files):
 		table =file[:-4]
-		print(f'Creating Stats for {table}...')
+		#print(f'Creating Stats for {table}...')
 		cur = conn.execute(f'PRAGMA TABLE_INFO({table})')
 		data = cur.fetchall()
 		
@@ -148,7 +152,7 @@ for file in contents:
 #or what ever number you like
 writeCsv("SELECT * FROM TABLE_OVERVIEW ORDER BY ROW_COUNT DESC",'TABLE_OVERVIEW')
 
-time_took= str(round(time.clock() - start_time,3))
+time_took= str(round(time.process_time() - start_time,3))
 print(f"Seconds taken... {time_took}\n")
 
 conn.commit()
